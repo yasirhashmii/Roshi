@@ -1,0 +1,128 @@
+:root {
+    --primary-bg: #fff0f5; /* Soft Lavender Blush */
+    --text-color: #4a4a4a;
+    --accent-color: #ff6b81; /* Romantic pink/red */
+    --card-bg: #ffffff;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lora', serif;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 100px 20px 50px;
+    background: linear-gradient(to bottom, #ffe3e8, #fff0f5);
+}
+
+.title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 4rem;
+    color: var(--accent-color);
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #7a7a7a;
+    margin-top: 10px;
+}
+
+/* Gallery Layout */
+.gallery-section, .message-section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 50px 20px;
+    text-align: center;
+}
+
+h2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    margin-bottom: 30px;
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.photo-card {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    width: 300px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.photo-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.photo-card p {
+    margin-top: 15px;
+    font-style: italic;
+    color: #666;
+}
+
+/* Love Letter Box */
+.letter {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    text-align: left;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    border-left: 5px solid var(--accent-color);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Floating Hearts Animation */
+#heart-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allows clicking through the hearts */
+    z-index: 1000;
+}
+
+.heart {
+    position: absolute;
+    bottom: -50px;
+    color: rgba(255, 107, 129, 0.4);
+    animation: float 6s ease-in infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+}
