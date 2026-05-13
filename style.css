@@ -149,22 +149,27 @@ footer {
 .message {
     padding: 10px 15px;
     border-radius: 18px;
-    max-width: 80%;
+    max-width: 75%;
     font-size: 0.95rem;
     word-wrap: break-word;
+    position: relative;
+    margin-bottom: 5px;
 }
 
 /* Style for received messages */
 .received {
-    background: #f1f0f0;
+    background: #e9e9eb; /* Light grey or pick a soft purple/blue */
+    color: #333;
     align-self: flex-start;
+    border-bottom-left-radius: 2px;
 }
 
 /* Style for sent messages */
 .sent {
-    background: var(--accent-color);
+    background: var(--accent-color); /* Your romantic pink/red */
     color: white;
     align-self: flex-end;
+    border-bottom-right-radius: 2px;
 }
 
 .chat-input-area {

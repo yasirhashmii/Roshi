@@ -9,8 +9,15 @@ function createHeart() {
     document.getElementById('heart-container').appendChild(heart);
     setTimeout(() => { heart.remove(); }, 6000);
 }
-setInterval(createHeart, 500);
+setInterval(createHeart, 1000);
 
+
+// 1. Generate or retrieve a unique ID for this device
+let myId = localStorage.getItem('chat_user_id');
+if (!myId) {
+    myId = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('chat_user_id', myId);
+}
 // 2. Firebase Configuration
 // I've used the keys you provided. 
 const firebaseConfig = {
@@ -39,6 +46,7 @@ function sendMessage() {
     if (text.trim() !== "") {
         database.ref('messages').push().set({
             text: text,
+            senderId: myId, // Tag the message with your ID
             timestamp: Date.now()
         });
         messageInput.value = "";
@@ -57,10 +65,15 @@ database.ref('messages').on('child_added', (snapshot) => {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
     
-    // Default style
-    messageElement.classList.add('received'); 
-    messageElement.innerText = data.text;
+    // Logic: If the ID matches this device, put it on the right (sent)
+    // Otherwise, put it on the left (received)
+    if (data.senderId === myId) {
+        messageElement.classList.add('sent');
+    } else {
+        messageElement.classList.add('received');
+    }
     
+    messageElement.innerText = data.text;
     messagesDiv.appendChild(messageElement);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight; 
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
