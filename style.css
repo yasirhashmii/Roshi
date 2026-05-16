@@ -1,3 +1,8 @@
+/* Paste this at the very top of your style.css file */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 :root {
     --primary-bg: #1a0b0d;       /* Dark velvet burgundy */
     --text-color: #fbeeed;       /* Soft cream text */
@@ -19,32 +24,32 @@ body, html {
     text-align: center;
     padding: 100px 20px 50px;
     /* This changes the gradient from light pink to a deep midnight plum blending into your dark background */
-    background: linear-gradient(to bottom, #38033c, var(--primary-bg)); 
+    background: linear-gradient(to bottom, #430417, var(--primary-bg)); 
 }
 
 .hero-box {
-    /* background: rgba(255, 255, 255, 0.75); Semi-transparent white */
-    border-radius: 15px;                    /* Smooth rounded corners */
-    padding: 20px;
-    width: 500px;                          /* Breathing room inside the box */
-    max-width: 1200px;                       /* Keeps the box from getting too wide on laptops */
-    margin: 10px auto 0 auto;               /* Centers the box and adds space below the photo */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);/* Super soft shadow for depth */
-    /* border: 3px solid rgba(255, 107, 129, 0.2); Subtle romantic pink border */
-    backdrop-filter: blur(10px);             /* Gives a premium frosted-glass effect */
+    /* background: rgba(255, 255, 255, 0.06);  */
+    border-radius: 15px;
+    padding: 30px;
+    width: 90%;                             /* Tells the box to take up 90% of a phone screen */
+    max-width: 650px;                       /* Prevents it from getting too wide on a laptop */
+    margin: 30px auto 0 auto;               
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    /* border: 1px solid rgba(255, 107, 129, 0.2); */
+    backdrop-filter: blur(10px);             
 }
 
 .title {
     font-family: 'Dancing Script', cursive;
     font-size: 4rem;
-    color: #4a0568; /* This uses your vibrant pink */
+    color: #68052b; /* This uses your vibrant pink */
     margin: 0;
     text-shadow: 2px 2px 8px rgba(0,0,0,0.5); /* Stronger shadow so it pops */
 }
 
 .subtitle {
     font-size: 1.1rem;
-    color: #b893b3;
+    color: #9c1e3c;
     margin: 0;
     line-height: 1.3;
     text-align: center;
@@ -122,7 +127,8 @@ h2 {
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     text-align: left;
-    line-height: 1.8;
+    line-height: 1.5;
+    color: rgb(134, 44, 54);
     font-size: 1.1rem;
     border-left: 5px solid var(--accent-color);
 }
