@@ -42,9 +42,32 @@ body, html {
 .title {
     font-family: 'Dancing Script', cursive;
     font-size: 4rem;
-    color: #68052b; /* This uses your vibrant pink */
     margin: 0;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.5); /* Stronger shadow so it pops */
+    text-align: center;
+    
+    /* Changing the base text color to pure white makes the neon glow pop dramatically */
+    color: #ffffff; 
+    
+    /* A gentle pulsing animation so the glow feels alive and "breathes" */
+    animation: pulseGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from {
+        text-shadow: 
+            0 0 4px #fff,
+            0 0 10px var(--accent-color),
+            0 0 20px var(--accent-color),
+            0 0 40px var(--accent-color);
+    }
+    to {
+        text-shadow: 
+            0 0 8px #fff,
+            0 0 15px var(--accent-color),
+            0 0 30px var(--accent-color),
+            0 0 60px var(--accent-color),
+            0 0 90px var(--accent-color);
+    }
 }
 
 .subtitle {
@@ -236,4 +259,86 @@ footer {
 @keyframes float {
     0% { transform: translateY(0) scale(1); opacity: 1; }
     100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+}
+
+/* Music Player Wrapper */
+.music-player-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 2000; /* Keeps it above everything else */
+    background: rgba(18, 8, 19, 0.6); /* Semi-transparent dark background */
+    padding: 8px 15px;
+    border-radius: 30px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 107, 129, 0.2);
+}
+
+/* Vinyl Disc Button */
+.vinyl-disc {
+    width: 45px;
+    height: 45px;
+    background: #111; /* Dark vinyl record look */
+    border-radius: 50%;
+    border: 3px solid #333;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    padding: 0;
+    transition: transform 0.2s ease;
+    /* Grooves on the vinyl record */
+    background: radial-gradient(circle, #222 25%, #111 26%, #111 40%, #222 41%, #111 42%, #111 60%, #222 61%, #111 62%);
+}
+
+.vinyl-disc:hover {
+    transform: scale(1.05);
+}
+
+/* The center label of the record */
+.vinyl-center {
+    width: 14px;
+    height: 14px;
+    background: var(--accent-color); /* Uses your romantic pink */
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Text style next to vinyl */
+.now-playing-text {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    font-family: 'Lora', serif;
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Spinning Animation Setup */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* This class gets added by JS when music plays */
+.vinyl-disc.playing {
+    animation: spin 3s linear infinite;
+}
+
+/* Responsive fix for tiny phone screens */
+@media (max-width: 400px) {
+    .music-player-container {
+        top: 10px;
+        left: 10px;
+        padding: 5px 10px;
+    }
+    .now-playing-text {
+        max-width: 110px;
+    }
 }

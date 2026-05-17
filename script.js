@@ -9,7 +9,7 @@ function createHeart() {
     document.getElementById('heart-container').appendChild(heart);
     setTimeout(() => { heart.remove(); }, 6000);
 }
-setInterval(createHeart, 3000);
+setInterval(createHeart, 2000);
 
 // function createCutie() {
 //     const heart = document.createElement('div');
@@ -88,4 +88,83 @@ database.ref('messages').on('child_added', (snapshot) => {
     messageElement.innerText = data.text;
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+// ==========================================
+// 6. Vinyl Music Player Logic
+// ==========================================
+
+// Future-proof playlist array! You can add more objects here later.
+const playlist = [
+    {
+        title: "Khat", // Replace with your actual song title
+        src: "Songs/Khat.mp3" // Replace with your file path or external link
+    }
+];
+
+let currentSongIndex = 0;
+let isPlaying = false;
+
+const audio = document.getElementById('bg-music');
+const vinylBtn = document.getElementById('vinyl-btn');
+const nowPlayingText = document.getElementById('now-playing');
+
+// Load the initial song details
+function loadSong(song) {
+    audio.src = song.src;
+    // We don't change the text to the song name until they actually click play
+    if (isPlaying) {
+        nowPlayingText.innerText = "Now playing: " + song.title;
+    }
+}
+
+// Initialize the first song configuration
+loadSong(playlist[currentSongIndex]);
+
+// Play/Pause Action Toggle
+function toggleMusic() {
+    if (isPlaying) {
+        audio.pause();
+        vinylBtn.classList.remove('playing');
+        nowPlayingText.innerText = "Music Paused";
+        isPlaying = false;
+    } else {
+        // Update text to show active song title right as it plays
+        nowPlayingText.innerText = "Now playing: " + playlist[currentSongIndex].title;
+        
+        audio.play().then(() => {
+            vinylBtn.classList.add('playing');
+            isPlaying = true;
+        }).catch((error) => {
+            console.log("Playback blocked or failed: ", error);
+            nowPlayingText.innerText = "Click to retry";
+        });
+    }
+}
+
+vinylBtn.addEventListener('click', toggleMusic);
+
+// ==========================================
+// 7. Auto-Advance Playlist Logic
+// ==========================================
+
+audio.addEventListener('ended', () => {
+    // 1. Move to the next song index
+    currentSongIndex++;
+
+    // 2. If we hit the end of the playlist, wrap back around to the first song
+    if (currentSongIndex >= playlist.length) {
+        currentSongIndex = 0;
+    }
+
+    // 3. Load the new song details
+    loadSong(playlist[currentSongIndex]);
+
+    // 4. Update the display text immediately
+    nowPlayingText.innerText = "Now playing: " + playlist[currentSongIndex].title;
+
+    // 5. Play the next track smoothly
+    audio.play().catch((error) => {
+        console.log("Playback failed on track transition: ", error);
+    });
 });
