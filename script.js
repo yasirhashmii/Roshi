@@ -98,22 +98,37 @@ database.ref('messages').on('child_added', (snapshot) => {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
     
-    // Logic: If the ID matches this device, put it on the right (sent)
+    // Assign correct side and color based on ID
     if (data.senderId === myId) {
         messageElement.classList.add('sent');
     } else {
         messageElement.classList.add('received');
     }
     
-    messageElement.innerText = data.text;
+    // --- CREATE THE MESSAGE TEXT ---
+    const textElement = document.createElement('div');
+    textElement.innerText = data.text;
+    messageElement.appendChild(textElement);
+    
+    // --- CREATE THE TIMESTAMP ---
+    // Fallback to current time just in case an old message didn't save a timestamp
+    const msgTime = data.timestamp ? new Date(data.timestamp) : new Date();
+    
+    // Format the date (e.g., "May 21, 10:47 PM")
+    const timeOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const timeString = msgTime.toLocaleString('en-US', timeOptions);
+    
+    const timeElement = document.createElement('div');
+    timeElement.classList.add('timestamp');
+    timeElement.innerText = timeString;
+    messageElement.appendChild(timeElement);
+    
+    // Append everything to the chat window
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-    // === NEW LOGIC: Play sound for incoming messages ===
-    // We only play the sound IF it's not the initial page load AND sound is toggled on
+    // === Notification Sound Logic ===
     if (!isInitialChatLoad && soundEnabled) {
-        // We also check that the senderId doesn't match your ID 
-        // so it only dings when SHE sends a message, not when you type one.
         if (data.senderId !== myId) {
             notificationSound.play().catch((err) => {
                 console.log("Browser blocked auto-play sound: ", err);

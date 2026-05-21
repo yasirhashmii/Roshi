@@ -355,6 +355,26 @@ footer {
     animation: spin 3s linear infinite;
 }
 
+/* ==========================================
+   Chat Timestamp Styles
+   ========================================== */
+.timestamp {
+    font-size: 0.7rem;
+    margin-top: 4px;
+    text-align: right;
+    font-family: sans-serif; /* Keeps numbers easy to read */
+}
+
+/* Make the timestamp slightly transparent white on your red bubbles */
+.sent .timestamp {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Make the timestamp a soft grey on her dark bubbles */
+.received .timestamp {
+    color: rgba(255, 255, 255, 0.4); /* Adjust this if you chose the lighter theme earlier */
+}
+
 /* Responsive fix for tiny phone screens */
 @media (max-width: 400px) {
     .music-player-container {
