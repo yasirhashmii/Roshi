@@ -367,12 +367,12 @@ footer {
 
 /* Make the timestamp slightly transparent white on your red bubbles */
 .sent .timestamp {
-    color: rgba(255, 255, 255, 0.7);
+    color: black;
 }
 
 /* Make the timestamp a soft grey on her dark bubbles */
 .received .timestamp {
-    color: rgba(255, 255, 255, 0.4); /* Adjust this if you chose the lighter theme earlier */
+    color: black; /* Adjust this if you chose the lighter theme earlier */
 }
 
 /* Responsive fix for tiny phone screens */
