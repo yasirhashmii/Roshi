@@ -52,6 +52,27 @@ const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const messagesDiv = document.getElementById('messages');
 
+// ==========================================
+// Chat Notification Sound Logic
+// ==========================================
+let soundEnabled = true;
+const soundToggleBtn = document.getElementById('soundToggle');
+const notificationSound = document.getElementById('notification-audio');
+
+// Toggle button click event
+soundToggleBtn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    soundToggleBtn.innerText = soundEnabled ? '🔊' : '🔇';
+});
+
+// Flag to track if the website is just loading old messages
+let isInitialChatLoad = true;
+
+// Firebase triggers this ONCE after all old messages are loaded
+database.ref('messages').once('value', () => {
+    isInitialChatLoad = false;
+});
+
 // 4. Send Message Function
 function sendMessage() {
     const text = messageInput.value;
@@ -78,7 +99,6 @@ database.ref('messages').on('child_added', (snapshot) => {
     messageElement.classList.add('message');
     
     // Logic: If the ID matches this device, put it on the right (sent)
-    // Otherwise, put it on the left (received)
     if (data.senderId === myId) {
         messageElement.classList.add('sent');
     } else {
@@ -88,6 +108,18 @@ database.ref('messages').on('child_added', (snapshot) => {
     messageElement.innerText = data.text;
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    // === NEW LOGIC: Play sound for incoming messages ===
+    // We only play the sound IF it's not the initial page load AND sound is toggled on
+    if (!isInitialChatLoad && soundEnabled) {
+        // We also check that the senderId doesn't match your ID 
+        // so it only dings when SHE sends a message, not when you type one.
+        if (data.senderId !== myId) {
+            notificationSound.play().catch((err) => {
+                console.log("Browser blocked auto-play sound: ", err);
+            });
+        }
+    }
 });
 
 // ==========================================

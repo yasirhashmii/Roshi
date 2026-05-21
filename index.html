@@ -80,7 +80,8 @@
     </section>
 
     <section class="chat-section">
-        <h2>Our Secret Chat</h2>
+        <h2>Our Secret Chat <button id="soundToggle" class="sound-btn">🔊</button></h2>
+        
         <div id="chat-window">
             <div id="messages"></div>
             <div class="chat-input-area">
@@ -88,6 +89,10 @@
                 <button id="sendBtn">Send</button>
             </div>
         </div>
+
+        <!-- Hidden audio player for the notification -->
+        <!-- Replace the src with your actual notification sound file -->
+        <audio id="notification-audio" src="music/notification.mp3"></audio>
     </section>
     
     <!-- Include Firebase SDKs -->
