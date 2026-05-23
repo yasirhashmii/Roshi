@@ -80,7 +80,8 @@ function sendMessage() {
         database.ref('messages').push().set({
             text: text,
             senderId: myId, // Tag the message with your ID
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            seen: false
         });
         messageInput.value = "";
     }
@@ -95,10 +96,12 @@ messageInput.addEventListener('keypress', (e) => {
 // 5. Sync messages in real-time
 database.ref('messages').on('child_added', (snapshot) => {
     const data = snapshot.val();
+    const messageKey = snapshot.key; // Get Firebase's unique ID for this message
+    
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
+    messageElement.id = 'msg-' + messageKey; // Attach the ID to the HTML element
     
-    // Assign correct side and color based on ID
     if (data.senderId === myId) {
         messageElement.classList.add('sent');
     } else {
@@ -110,30 +113,40 @@ database.ref('messages').on('child_added', (snapshot) => {
     textElement.innerText = data.text;
     messageElement.appendChild(textElement);
     
-    // --- CREATE THE TIMESTAMP ---
-    // Fallback to current time just in case an old message didn't save a timestamp
+    // --- CREATE THE TIMESTAMP & SEEN STATUS ---
     const msgTime = data.timestamp ? new Date(data.timestamp) : new Date();
-    
-    // Format the date (e.g., "May 21, 10:47 PM")
     const timeOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     const timeString = msgTime.toLocaleString('en-US', timeOptions);
     
-    const timeElement = document.createElement('div');
-    timeElement.classList.add('timestamp');
-    timeElement.innerText = timeString;
-    messageElement.appendChild(timeElement);
+    const timeContainer = document.createElement('div');
+    timeContainer.classList.add('timestamp');
     
-    // Append everything to the chat window
+    const timeText = document.createElement('span');
+    timeText.innerText = timeString;
+    timeContainer.appendChild(timeText);
+
+    // Create the checkmarks (1 for sent, 2 for seen)
+    const seenStatus = document.createElement('span');
+    seenStatus.classList.add('seen-status');
+    seenStatus.innerText = data.seen ? '✓✓' : '✓'; 
+    timeContainer.appendChild(seenStatus);
+
+    messageElement.appendChild(timeContainer);
+    
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
     // === Notification Sound Logic ===
     if (!isInitialChatLoad && soundEnabled) {
         if (data.senderId !== myId) {
-            notificationSound.play().catch((err) => {
-                console.log("Browser blocked auto-play sound: ", err);
-            });
+            notificationSound.play().catch((err) => console.log(err));
         }
+    }
+
+    // === NEW: Mark incoming messages as seen ===
+    // If the message is from her, and it hasn't been marked seen yet, update the database
+    if (data.senderId !== myId && !data.seen) {
+        database.ref('messages/' + messageKey).update({ seen: true });
     }
 });
 
@@ -214,4 +227,21 @@ audio.addEventListener('ended', () => {
     audio.play().catch((error) => {
         console.log("Playback failed on track transition: ", error);
     });
+});
+
+// === NEW: Listen for changes (like when a message gets read) ===
+database.ref('messages').on('child_changed', (snapshot) => {
+    const data = snapshot.val();
+    const messageKey = snapshot.key;
+    
+    // Find the specific message bubble on the screen
+    const messageElement = document.getElementById('msg-' + messageKey);
+    
+    if (messageElement) {
+        // Find the checkmarks inside that bubble and update them
+        const seenStatus = messageElement.querySelector('.seen-status');
+        if (seenStatus) {
+            seenStatus.innerText = data.seen ? '✓✓' : '✓';
+        }
+    }
 });

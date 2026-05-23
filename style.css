@@ -361,18 +361,23 @@ footer {
 .timestamp {
     font-size: 0.7rem;
     margin-top: 4px;
-    text-align: right;
-    font-family: sans-serif; /* Keeps numbers easy to read */
+    display: flex;
+    justify-content: flex-end; /* Aligns to the right */
+    align-items: center;
+    gap: 5px; /* Space between time and checkmark */
+    font-family: sans-serif;
+    color: black
 }
 
-/* Make the timestamp slightly transparent white on your red bubbles */
-.sent .timestamp {
-    color: black;
+/* Style for the checkmarks */
+.seen-status {
+    font-weight: bold;
+    letter-spacing: -2px; /* Pulls the two checkmarks closer together */
 }
 
-/* Make the timestamp a soft grey on her dark bubbles */
-.received .timestamp {
-    color: black; /* Adjust this if you chose the lighter theme earlier */
+/* Hide the checkmarks on messages YOU receive (just like normal chat apps) */
+.received .seen-status {
+    display: none;
 }
 
 /* Responsive fix for tiny phone screens */
