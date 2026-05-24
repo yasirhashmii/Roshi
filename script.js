@@ -11,18 +11,6 @@ function createHeart() {
 }
 setInterval(createHeart, 2000);
 
-// function createCutie() {
-//     const heart = document.createElement('div');
-//     heart.classList.add('heart');
-//     heart.innerHTML = 'Cutie';
-//     heart.style.left = Math.random() * 100 + 'vw';
-//     heart.style.animationDuration = Math.random() * 3 + 4 + 's'; 
-//     heart.style.fontSize = Math.random() * 1 + 1 + 'rem'; 
-//     document.getElementById('heart-container').appendChild(heart);
-//     setTimeout(() => { heart.remove(); }, 6000);
-// }
-// setInterval(createCutie, 3000);
-
 
 // 1. Generate or retrieve a unique ID for this device
 let myId = localStorage.getItem('chat_user_id');
@@ -79,11 +67,14 @@ function sendMessage() {
     if (text.trim() !== "") {
         database.ref('messages').push().set({
             text: text,
-            senderId: myId, // Tag the message with your ID
+            senderId: myId, 
             timestamp: Date.now(),
-            seen: false
+            seen: false 
         });
         messageInput.value = "";
+        
+        // Instantly clears the typing status when the message sends
+        database.ref('typing_status/' + myId).set(false); 
     }
 }
 
@@ -93,14 +84,50 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
+// ==========================================
+// Smart "Seen" Observer Logic
+// ==========================================
+const seenObserver = new IntersectionObserver((entries) => {
+    // 1. If the browser tab is hidden, stop immediately. Do not mark as seen.
+    if (document.visibilityState !== 'visible') return;
+
+    entries.forEach(entry => {
+        // 2. If the message bubble physically enters the screen...
+        if (entry.isIntersecting) {
+            const messageKey = entry.target.dataset.key; // Get the ID
+            
+            // Update Firebase
+            database.ref('messages/' + messageKey).update({ seen: true });
+            
+            // Stop watching this message so we don't spam the database
+            seenObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.5 }); // The message must be at least 50% visible on screen
+
+// 3. Handle Tab Switching
+// If she switches back to your tab, re-check any unseen messages currently on screen
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        const unseenMessages = document.querySelectorAll('.unseen-msg');
+        unseenMessages.forEach(msg => {
+            seenObserver.unobserve(msg);
+            seenObserver.observe(msg); // Re-trigger the camera check
+        });
+    }
+});
+
 // 5. Sync messages in real-time
 database.ref('messages').on('child_added', (snapshot) => {
     const data = snapshot.val();
-    const messageKey = snapshot.key; // Get Firebase's unique ID for this message
+    const messageKey = snapshot.key;
     
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
-    messageElement.id = 'msg-' + messageKey; // Attach the ID to the HTML element
+    messageElement.id = 'msg-' + messageKey; 
+    
+    // Attach the key to the HTML so our Observer can find it later
+    messageElement.dataset.key = messageKey;
     
     if (data.senderId === myId) {
         messageElement.classList.add('sent');
@@ -108,12 +135,10 @@ database.ref('messages').on('child_added', (snapshot) => {
         messageElement.classList.add('received');
     }
     
-    // --- CREATE THE MESSAGE TEXT ---
     const textElement = document.createElement('div');
     textElement.innerText = data.text;
     messageElement.appendChild(textElement);
     
-    // --- CREATE THE TIMESTAMP & SEEN STATUS ---
     const msgTime = data.timestamp ? new Date(data.timestamp) : new Date();
     const timeOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     const timeString = msgTime.toLocaleString('en-US', timeOptions);
@@ -125,7 +150,6 @@ database.ref('messages').on('child_added', (snapshot) => {
     timeText.innerText = timeString;
     timeContainer.appendChild(timeText);
 
-    // Create the checkmarks (1 for sent, 2 for seen)
     const seenStatus = document.createElement('span');
     seenStatus.classList.add('seen-status');
     seenStatus.innerText = data.seen ? '✓✓' : '✓'; 
@@ -136,17 +160,16 @@ database.ref('messages').on('child_added', (snapshot) => {
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-    // === Notification Sound Logic ===
     if (!isInitialChatLoad && soundEnabled) {
         if (data.senderId !== myId) {
             notificationSound.play().catch((err) => console.log(err));
         }
     }
 
-    // === NEW: Mark incoming messages as seen ===
-    // If the message is from her, and it hasn't been marked seen yet, update the database
+    // === NEW: Use the Smart Observer instead of instantly updating ===
     if (data.senderId !== myId && !data.seen) {
-        database.ref('messages/' + messageKey).update({ seen: true });
+        messageElement.classList.add('unseen-msg'); // Add a temporary class
+        seenObserver.observe(messageElement);       // Turn the camera on for this message
     }
 });
 
@@ -229,19 +252,66 @@ audio.addEventListener('ended', () => {
     });
 });
 
-// === NEW: Listen for changes (like when a message gets read) ===
+// Listen for changes (like when a message gets read)
 database.ref('messages').on('child_changed', (snapshot) => {
     const data = snapshot.val();
     const messageKey = snapshot.key;
     
-    // Find the specific message bubble on the screen
     const messageElement = document.getElementById('msg-' + messageKey);
     
     if (messageElement) {
-        // Find the checkmarks inside that bubble and update them
         const seenStatus = messageElement.querySelector('.seen-status');
         if (seenStatus) {
-            seenStatus.innerText = data.seen ? '✓✓' : '✓';
+            seenStatus.innerText = data.seen ? 'Seen' : 'Delivered';
         }
+        
+        // Clean up the HTML once it's seen
+        if (data.seen) {
+            messageElement.classList.remove('unseen-msg');
+        }
+    }
+});
+
+// ==========================================
+// Typing Indicator Logic
+// ==========================================
+const typingIndicator = document.getElementById('typing-indicator');
+let typingTimeout = null;
+
+// 1. Tell Firebase when YOU are typing
+messageInput.addEventListener('input', () => {
+    // Set your typing status to true
+    database.ref('typing_status/' + myId).set(true);
+
+    // Clear the timer if you keep typing
+    if (typingTimeout) clearTimeout(typingTimeout);
+
+    // Stop showing as "typing" after 5 seconds of inactivity
+    typingTimeout = setTimeout(() => {
+        database.ref('typing_status/' + myId).set(false);
+    }, 5000);
+});
+
+// 2. Listen for when SHE is typing
+database.ref('typing_status').on('value', (snapshot) => {
+    let isSomeoneElseTyping = false;
+
+    // Loop through all users' typing statuses
+    snapshot.forEach((childSnapshot) => {
+        const userId = childSnapshot.key;
+        const isTyping = childSnapshot.val();
+
+        // If the ID isn't yours, and the status is true
+        if (userId !== myId && isTyping === true) {
+            isSomeoneElseTyping = true;
+        }
+    });
+
+    // Show or hide the bouncing dots based on the check
+    if (isSomeoneElseTyping) {
+        typingIndicator.classList.remove('hidden');
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll down to see the dots
+    } else {
+        typingIndicator.classList.add('hidden');
     }
 });

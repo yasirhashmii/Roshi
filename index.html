@@ -84,6 +84,16 @@
         
         <div id="chat-window">
             <div id="messages"></div>
+
+            <!-- START: New Typing Indicator -->
+            <div id="typing-indicator" class="typing-indicator hidden">
+                <span>Typing</span>
+                <div class="typing-dots">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </div>
+            </div>
+            <!-- END: New Typing Indicator -->
+
             <div class="chat-input-area">
                 <input type="text" id="messageInput" placeholder="Type a message...">
                 <button id="sendBtn">Send</button>
