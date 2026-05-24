@@ -152,7 +152,7 @@ database.ref('messages').on('child_added', (snapshot) => {
 
     const seenStatus = document.createElement('span');
     seenStatus.classList.add('seen-status');
-    seenStatus.innerText = data.seen ? '✓✓' : '✓'; 
+    seenStatus.innerText = data.seen ? 'Seen' : 'Delivered'; 
     timeContainer.appendChild(seenStatus);
 
     messageElement.appendChild(timeContainer);
